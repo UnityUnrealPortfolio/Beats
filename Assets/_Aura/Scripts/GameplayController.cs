@@ -16,6 +16,7 @@ namespace Beats
         [Header("Tracks")]
         [SerializeField] Track _track;
 
+        private TrackView _trackView;
         private WaitForSeconds waitForSeconds;
         private bool _completed;
         private bool _played; //has the player pressed a key?
@@ -53,6 +54,7 @@ namespace Beats
         #region Monobehaviour Methods
         private void Awake()
         {
+            _trackView = FindObjectOfType<TrackView>();
             Instance = this;
             SecondsPaBeat = track.bpm / 60f;
             BeatsPaSecond = 60f / track.bpm;
@@ -112,22 +114,22 @@ namespace Beats
 
         private void PlayBeat(int input)
         {
-            Debug.Log(input);
+            _played = true;
             if(_track.beats[Current]== -1)
             {
                 //played a beat we should have just watched
-                Debug.Log(String.Format("{0} Played Unitimely", input));
+                Debug.Log("Untimely play");
+ 
             }
             else if (_track.beats[Current] == input)
             {
                 //played correctly
-                Debug.Log(String.Format("{0} Played right", input));
+                _trackView.TriggerView(Current, TrackView.Trigger.Right);
             }
             else
             {
                 //we missed
-                Debug.Log(String.Format("{0} Played,expected {1}",input, _track.beats[Current]));
-
+                _trackView.TriggerView(Current, TrackView.Trigger.Wrong);
             }
         }
 
@@ -136,9 +138,10 @@ namespace Beats
             Debug.Log("Tick");
             if (_played && _track.beats[Current] != -1)
             {
-                Debug.Log(String.Format("{0} Missed", _track.beats[Current]));
+                //Debug.Log(String.Format("{0} Missed", _track.beats[Current]));
+                _trackView.TriggerView(Current, TrackView.Trigger.Missed);
             }
-                _played = false;
+            _played = false;
             Current++;
         }
 
